@@ -9,14 +9,13 @@ using namespace std;
 // Scanner implementation
 
 // You may have to modify this constructor, although it might not be neccessary.
-Scanner::Scanner() : line(0), 
+Scanner::Scanner() : line(1), 
                      value(0) {
     current_index = 0;
     current_token_length = 1;
     input_string = "";
-    char single_char = ' ';
+    char single_char;
     while(cin.get(single_char)){
-        cout<<single_char;
         input_string.push_back(single_char);
     }
 }
