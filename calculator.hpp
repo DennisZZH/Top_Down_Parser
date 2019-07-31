@@ -17,7 +17,6 @@ class Scanner {
     int current_index;
 
 public:
-    // You really need to implement these four methods for the scanner to work.
     Token nextToken();
     void eatToken(Token);
     int lineNumber();
@@ -34,8 +33,18 @@ class Parser {
     
     bool evaluate;
     void start();
-    // You will need to define the recursive descent functions you're going to use here.
-    // WRITEME
+    void list();
+    void list_prime();
+    void expression();
+    void expression_prime();
+    void term();
+    void term_prime();
+    void factor();
+
+    void match(Token token);
+    bool isInFollow(string symbol, Token token);
+    void eliminate_newline();
+
 public:
     void parse();
     
