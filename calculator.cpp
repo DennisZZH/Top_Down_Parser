@@ -8,7 +8,6 @@ using namespace std;
 
 // Scanner implementation
 
-// You may have to modify this constructor, although it might not be neccessary.
 Scanner::Scanner() : line(1), 
                      value(0) {
     current_index = 0;
@@ -20,7 +19,6 @@ Scanner::Scanner() : line(1),
     }
 }
 
-// You need to fill this method with the appropriate code for it to work as described in the project description.
 Token Scanner::nextToken() {
     Token target = T_EOF;
     int i = current_index;
@@ -74,7 +72,6 @@ Token Scanner::nextToken() {
     return target;
 }
 
-// You need to fill this method with the appropriate code for it to work as described in the project description.
 void Scanner::eatToken(Token toConsume) {
     current_index += current_token_length;
     if(toConsume == T_NEWLN) line++;
@@ -90,9 +87,8 @@ int Scanner::getNumberValue() {
 
 // Parser implementation
 
-// You may need to modify this constructor and make it do stuff, although it might not be neccessary.
 Parser::Parser(bool eval) : evaluate(eval) {
-    // WRITEME
+   
 }
 
 void Parser::parse() {
@@ -100,13 +96,18 @@ void Parser::parse() {
 }
 
 void Parser::start() {
-    // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
-    // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
-    // or less steps in the process.
-    //
-    // WRITEME
+   list();
+   break;
 }
 
-// You will need to add more methods for this to work. Don't forget to also define them in calculator.hpp!
-// WRITEME
+void Parser::list() {
+    expression();
+    list_prime();
+    break;
+}
+
+void Parser::list_prime() {
+    
+}
+
 
