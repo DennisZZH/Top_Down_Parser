@@ -21,7 +21,7 @@ Scanner::Scanner() : line(1),
 
 Token Scanner::nextToken() {
     Token target = T_EOF;
-    int i = current_index;
+    unsigned long int i = current_index;
     
     while(input_string[i] == ' '){
         i++;
@@ -101,26 +101,21 @@ void Parser::parse() {
 bool Parser::isInFollow(string symbol, Token token){
     bool result;
 
-    vector<Token> start_list_listprime = {T_EOF};
-    vector<Token> expression_expressionprime = {T_EOF, T_SEMICOLON, T_OPENPAREN};
-    vector<Token> term_termprime = {T_EOF, T_SEMICOLON, T_OPENPAREN, T_PLUS, T_MINUS};
-    vector<Token> factor = {T_EOF, T_SEMICOLON, T_OPENPAREN, T_PLUS, T_MINUS, T_MULTIPLY, T_DIVIDE, T_MODULO};
-
     if(symbol == "start" || symbol == "list" || symbol == "list_prime"){
-        result = (find(start_list_listprime.begin(), start_list_listprime.end(), token) != start_list_listprime.end());
+        result = ( token == T_EOF);
     }else if(symbol == "expression" || symbol == "expression_prime"){
-        result = (find(expression_expressionprime.begin(), expression_expressionprime.end(), token) != expression_expressionprime.end());
+        result = ( token == T_EOF || token == T_SEMICOLON || token == T_CLOSEPAREN);
     }else if(symbol == "term" || symbol == "term_prime"){
-        result = (find(term_termprime.begin(), term_termprime.end(), token) != term_termprime.end());
+        result = (token == T_EOF || token == T_SEMICOLON || token ==T_CLOSEPAREN || token == T_PLUS || token == T_MINUS);
     }else if(symbol == "factor"){
-        result = (find(factor.begin(), factor.end(), token) != factor.end());
+        result = (token == T_EOF || token == T_SEMICOLON || token ==T_CLOSEPAREN || token == T_PLUS || token == T_MINUS || token == T_MULTIPLY || token == T_DIVIDE || token == T_MODULO);
     }
 
     return result;
 }
 
 void Parser::eliminate_newline(){
-    while(scanner.nextToken == T_NEWLN){
+    while(scanner.nextToken() == T_NEWLN){
         scanner.eatToken(T_NEWLN);
     }
 }
@@ -147,7 +142,7 @@ void Parser::list_prime() {
         return;
     }
     else{
-        parseError(scanner.lineNumber, scanner.nextToken());
+        parseError(scanner.lineNumber(), scanner.nextToken());
     }
 }
 
@@ -170,7 +165,7 @@ void Parser::expression_prime(){
     }else if(isInFollow("expression_prime", scanner.nextToken())){
         return;
     }else{
-        parseError(scanner.lineNumber, scanner.nextToken());
+        parseError(scanner.lineNumber(), scanner.nextToken());
     }
 }
 
@@ -197,7 +192,7 @@ void Parser::term_prime(){
     }else if(isInFollow("term_prime", scanner.nextToken())){
         return;
     }else{
-        parseError(scanner.lineNumber, scanner.nextToken());
+        parseError(scanner.lineNumber(), scanner.nextToken());
     }
 }
 
@@ -209,6 +204,8 @@ void Parser::factor(){
         scanner.eatToken(T_CLOSEPAREN);
     }else if(scanner.nextToken() == T_NUMBER){
         scanner.eatToken(T_NUMBER);
+    }else{
+        parseError(scanner.lineNumber(), scanner.nextToken());
     }
 }
 
