@@ -4,6 +4,7 @@
 
 #include <climits>
 #include <vector>
+#include <stack>
 
 using namespace std;
 // SCANNER DEFINITION
@@ -30,7 +31,10 @@ public:
 // You can freely add member fields and functions to this class.
 class Parser {
     Scanner scanner;
-    
+    stack<int> num_stack;
+    stack<Token> operator_stack;
+    vector<int> result;
+
     bool evaluate;
     void start();
     void list();
@@ -47,6 +51,6 @@ class Parser {
 
 public:
     void parse();
-    
+    void calculate();
     Parser(bool);
 };

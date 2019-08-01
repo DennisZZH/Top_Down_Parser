@@ -155,10 +155,12 @@ void Parser::expression(){
 void Parser::expression_prime(){
     eliminate_newline();
     if(scanner.nextToken() == T_PLUS){
+        operator_stack.push(T_PLUS);
         scanner.eatToken(T_PLUS);
         term();
         expression_prime();
     }else if(scanner.nextToken() == T_MINUS){
+        operator_stack.push(T_MINUS);
         scanner.eatToken(T_MINUS);
         term();
         expression_prime();
@@ -178,14 +180,17 @@ void Parser::term(){
 void Parser::term_prime(){
     eliminate_newline();
     if(scanner.nextToken() == T_MULTIPLY){
+        operator_stack.push(T_MULTIPLY);
         scanner.eatToken(T_MULTIPLY);
         factor();
         term_prime();
     }else if(scanner.nextToken() == T_DIVIDE){
+        operator_stack.push(T_DIVIDE);
         scanner.eatToken(T_DIVIDE);
         factor();
         term_prime();
     }else if(scanner.nextToken() == T_MODULO){
+        operator_stack.push(T_MODULO);
         scanner.eatToken(T_MODULO);
         factor();
         term_prime();
@@ -203,9 +208,34 @@ void Parser::factor(){
         expression();
         scanner.eatToken(T_CLOSEPAREN);
     }else if(scanner.nextToken() == T_NUMBER){
+        num_stack.push(scanner.getNumberValue());
         scanner.eatToken(T_NUMBER);
     }else{
         parseError(scanner.lineNumber(), scanner.nextToken());
+    }
+}
+
+void Parser::calculate(){
+    int a, b, result;
+    Token token;
+    while(!num_stack.empty() && !operator_stack.empty()){
+        a = num_stack.top();
+        num_stack.pop();
+        b = num_stack.top();
+        num_stack.pop();
+        token = operator_stack.top();
+        operator_stack.pop();
+        
+        switch (token)
+        {
+            case T_PLUS:
+            case T_MINUS:
+            case T_MULTIPLY:
+            case T_DIVIDE:
+            case T_MODULO:
+
+        }
+        
     }
 }
 
