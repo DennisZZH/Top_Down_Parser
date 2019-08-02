@@ -305,4 +305,3 @@ bool Parser::isPrecidence(Token a, Token b){
     }
     return false;
 }
-
