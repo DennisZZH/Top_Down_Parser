@@ -68,13 +68,16 @@ Token Scanner::nextToken() {
     }else{
         scanError(line, input_string[i]);
     }
-    
     return target;
 }
 
 void Scanner::eatToken(Token toConsume) {
     if(nextToken()!= toConsume){
         mismatchError(line, toConsume, nextToken());
+    }
+    tokens.push_back(toConsume);
+    if(toConsume == T_NUMBER){
+        num_list.push_back(value);
     }
     current_index += current_token_length;
     if(toConsume == T_NEWLN) line++;
@@ -84,18 +87,21 @@ int Scanner::lineNumber() {
     return this->line;
 }
 
-int Scanner::getNumberValue() {
+long Scanner::getNumberValue() {
     return this->value;
 }
 
 // Parser implementation
 
 Parser::Parser(bool eval) : evaluate(eval) {
-   
+   line = 1;
 }
 
 void Parser::parse() {
     start();
+    if(evaluate){
+        do_evaluate();
+    }
 }
 
 bool Parser::isInFollow(string symbol, Token token){
@@ -155,12 +161,10 @@ void Parser::expression(){
 void Parser::expression_prime(){
     eliminate_newline();
     if(scanner.nextToken() == T_PLUS){
-        operator_stack.push(T_PLUS);
         scanner.eatToken(T_PLUS);
         term();
         expression_prime();
     }else if(scanner.nextToken() == T_MINUS){
-        operator_stack.push(T_MINUS);
         scanner.eatToken(T_MINUS);
         term();
         expression_prime();
@@ -180,17 +184,14 @@ void Parser::term(){
 void Parser::term_prime(){
     eliminate_newline();
     if(scanner.nextToken() == T_MULTIPLY){
-        operator_stack.push(T_MULTIPLY);
         scanner.eatToken(T_MULTIPLY);
         factor();
         term_prime();
     }else if(scanner.nextToken() == T_DIVIDE){
-        operator_stack.push(T_DIVIDE);
         scanner.eatToken(T_DIVIDE);
         factor();
         term_prime();
     }else if(scanner.nextToken() == T_MODULO){
-        operator_stack.push(T_MODULO);
         scanner.eatToken(T_MODULO);
         factor();
         term_prime();
@@ -208,35 +209,100 @@ void Parser::factor(){
         expression();
         scanner.eatToken(T_CLOSEPAREN);
     }else if(scanner.nextToken() == T_NUMBER){
-        num_stack.push(scanner.getNumberValue());
         scanner.eatToken(T_NUMBER);
+    }else if(scanner.nextToken() == T_EOF){
+        return;
     }else{
         parseError(scanner.lineNumber(), scanner.nextToken());
     }
 }
 
-void Parser::calculate(){
-    int a, b, result;
-    Token token;
-    while(!num_stack.empty() && !operator_stack.empty()){
-        a = num_stack.top();
-        num_stack.pop();
-        b = num_stack.top();
-        num_stack.pop();
-        token = operator_stack.top();
-        operator_stack.pop();
-        
-        switch (token)
-        {
-            case T_PLUS:
-            case T_MINUS:
-            case T_MULTIPLY:
-            case T_DIVIDE:
-            case T_MODULO:
-
-        }
-        
+void Parser::calculate_two_num(){
+    long result;
+    long a = num_stack.top();
+    num_stack.pop();
+    long b = num_stack.top();
+    num_stack.pop();
+    Token token = operator_stack.top();
+    operator_stack.pop();
+            
+    switch (token)
+    {
+                case T_PLUS: result = b + a;
+                case T_MINUS: result = b - a;
+                case T_MULTIPLY: result = b * a;
+                case T_DIVIDE:
+                {
+                    if(a == 0){
+                        divideByZeroError(line, b);
+                    }else{
+                        result = b / a;
+                    }
+                }
+                case T_MODULO: result = b % a;
     }
+
+    if(result > INT_MAX || result < INT_MIN){
+        outOfBoundsError(this->line, result);
+    }
+
+    num_stack.push(result);
 }
 
+void Parser::do_evaluate(){
+    for(auto i = scanner.tokens.begin(); i != scanner.tokens.end() ; i++) {
+        Token tok = *i;
+        if(tok == T_NUMBER){
+            num_stack.push( *( scanner.num_list.begin() ) );
+            scanner.num_list.pop_front();
+        }else if(tok == T_PLUS || tok == T_MINUS || tok == T_MULTIPLY || tok == T_DIVIDE || tok == T_MODULO){
+            while (!operator_stack.empty() && isPrecidence(tok, operator_stack.top())){                            
+                calculate_two_num();                        
+            }                                                                 
+            operator_stack.push(tok); 
+        }else if(tok == T_OPENPAREN){
+            operator_stack.push(tok);
+        }else if(tok == T_CLOSEPAREN){
+            while (operator_stack.top() != T_OPENPAREN){
+                calculate_two_num(); 
+            }
+            operator_stack.pop();  
+        }else if(tok == T_SEMICOLON){
+            while ( !operator_stack.empty() && num_stack.size() > 1 ){
+                calculate_two_num(); 
+            }
+            if (!num_stack.empty()) {
+                if(num_stack.top() > INT_MAX || num_stack.top() < INT_MIN){
+                    outOfBoundsError(line, num_stack.top());
+                }
+                print_result += to_string(num_stack.top());
+                print_result += "\n"; 
+                num_stack.pop();
+            } 
+            while (!operator_stack.empty()) operator_stack.pop();     
+        }else if(tok == T_NEWLN){
+             line = line + 1;
+        }
+    }               
+         
+    while ( !operator_stack.empty() && num_stack.size() > 1 ){calculate_two_num(); }
+        if (!num_stack.empty()) {
+            if(num_stack.top() > INT_MAX || num_stack.top() < INT_MIN){
+                outOfBoundsError(line, num_stack.top());
+            }
+            print_result += to_string(num_stack.top());   
+        }
+
+    cout<<print_result;
+}
+
+bool Parser::isPrecidence(Token a, Token b){
+    if(b == T_OPENPAREN) return false;
+    else if(b == T_MULTIPLY || b == T_DIVIDE || b == T_MODULO){
+        if(a == T_PLUS || a == T_MINUS){
+            return true;
+        }
+    }
+    return false;
+}
 

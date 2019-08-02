@@ -5,6 +5,7 @@
 #include <climits>
 #include <vector>
 #include <stack>
+#include <list>
 
 using namespace std;
 // SCANNER DEFINITION
@@ -12,16 +13,19 @@ using namespace std;
 // You can freely add member fields and functions to this class.
 class Scanner {
     int line;
-    int value;
-    string input_string;
+    long value;
     int current_token_length;
     int current_index;
 
 public:
+    string input_string;
+    vector<Token> tokens;
+    list<long> num_list;
+
     Token nextToken();
     void eatToken(Token);
     int lineNumber();
-    int getNumberValue();
+    long getNumberValue();
     
     Scanner();
 };
@@ -31,9 +35,10 @@ public:
 // You can freely add member fields and functions to this class.
 class Parser {
     Scanner scanner;
-    stack<int> num_stack;
     stack<Token> operator_stack;
-    vector<int> result;
+    stack<long> num_stack;
+    string print_result;
+    int line;
 
     bool evaluate;
     void start();
@@ -45,12 +50,14 @@ class Parser {
     void term_prime();
     void factor();
 
-    void match(Token token);
     bool isInFollow(string symbol, Token token);
     void eliminate_newline();
 
+    void do_evaluate();
+    void calculate_two_num();
+    bool isPrecidence(Token a, Token b);
+
 public:
     void parse();
-    void calculate();
     Parser(bool);
 };
