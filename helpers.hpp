@@ -9,17 +9,17 @@
 // This is the token type, it contains all possible tokens in our language.
 
 enum Token {
-    T_PLUS,
-    T_MINUS,
-    T_MULTIPLY,
-    T_DIVIDE,
-    T_MODULO,
-    T_OPENPAREN,
-    T_CLOSEPAREN,
-    T_NUMBER,
-    T_SEMICOLON,
-    T_NEWLN,
-    T_EOF
+    T_PLUS,         //0
+    T_MINUS,        //1
+    T_MULTIPLY,     //2
+    T_DIVIDE,       //3
+    T_MODULO,       //4
+    T_OPENPAREN,    //5
+    T_CLOSEPAREN,   //6
+    T_NUMBER,       //7
+    T_SEMICOLON,    //8
+    T_NEWLN,        //9
+    T_EOF           //10
 };
 
 // This function will convert a token to a string, for display.

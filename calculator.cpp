@@ -20,12 +20,11 @@ Scanner::Scanner() : line(1),
 }
 
 Token Scanner::nextToken() {
+    while(input_string[current_index] == ' '){
+        current_index++;
+    }
     Token target = T_EOF;
     unsigned long int i = current_index;
-    
-    while(input_string[i] == ' '){
-        i++;
-    }
     current_token_length = 1;
     if( i == input_string.size()){
         return target;
@@ -84,11 +83,11 @@ void Scanner::eatToken(Token toConsume) {
 }
 
 int Scanner::lineNumber() {
-    return this->line;
+    return line;
 }
 
-long Scanner::getNumberValue() {
-    return this->value;
+long long int Scanner::getNumberValue() {
+    return value;
 }
 
 // Parser implementation
@@ -218,19 +217,19 @@ void Parser::factor(){
 }
 
 void Parser::calculate_two_num(){
-    long result;
-    long a = num_stack.top();
+    long long int result = 0;
+    long long int a = num_stack.top();
     num_stack.pop();
-    long b = num_stack.top();
+    long long int b = num_stack.top();
     num_stack.pop();
     Token token = operator_stack.top();
     operator_stack.pop();
             
     switch (token)
     {
-                case T_PLUS: result = b + a;
-                case T_MINUS: result = b - a;
-                case T_MULTIPLY: result = b * a;
+                case T_PLUS: result = b + a; break;
+                case T_MINUS: result = b - a; break;
+                case T_MULTIPLY: result = b * a; break;
                 case T_DIVIDE:
                 {
                     if(a == 0){
@@ -238,12 +237,12 @@ void Parser::calculate_two_num(){
                     }else{
                         result = b / a;
                     }
+                    break;
                 }
-                case T_MODULO: result = b % a;
+                case T_MODULO: result = b % a; break;
     }
-
     if(result > INT_MAX || result < INT_MIN){
-        outOfBoundsError(this->line, result);
+        outOfBoundsError(line, result);
     }
 
     num_stack.push(result);
@@ -299,9 +298,7 @@ void Parser::do_evaluate(){
 bool Parser::isPrecidence(Token a, Token b){
     if(b == T_OPENPAREN) return false;
     else if(b == T_MULTIPLY || b == T_DIVIDE || b == T_MODULO){
-        if(a == T_PLUS || a == T_MINUS){
             return true;
-        }
     }
     return false;
 }

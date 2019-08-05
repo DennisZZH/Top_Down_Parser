@@ -13,19 +13,19 @@ using namespace std;
 // You can freely add member fields and functions to this class.
 class Scanner {
     int line;
-    long value;
+    long long int value;
     int current_token_length;
     int current_index;
 
 public:
     string input_string;
     vector<Token> tokens;
-    list<long> num_list;
+    list<long long int> num_list;
 
     Token nextToken();
     void eatToken(Token);
     int lineNumber();
-    long getNumberValue();
+    long long int getNumberValue();
     
     Scanner();
 };
@@ -36,7 +36,7 @@ public:
 class Parser {
     Scanner scanner;
     stack<Token> operator_stack;
-    stack<long> num_stack;
+    stack<long long int> num_stack;
     string print_result;
     int line;
 
